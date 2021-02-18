@@ -2,14 +2,8 @@ import { Router } from "express";
 import ytdl, { chooseFormat } from "ytdl-core";
 import { verifyURL } from "../middlewares/youtube";
 import { formatVideoData } from "../utils/youtube";
-import fs from "fs";
-import path from "path";
-import { CustomFormat } from "../../types";
 const route = Router();
-const filesPath = path.join(__dirname, "..", "downloads");
-fs.exists(filesPath, (exists) => {
-  !exists && fs.mkdir(filesPath, (er) => console.log(er));
-});
+
 route.get("/meta", verifyURL, async (req, res, next) => {
   const yt_link = req.query.videolink as string;
 
@@ -37,9 +31,6 @@ route.get("/download", async (req, res, next) => {
 
   const vidInfo = await ytdl.getInfo(yt_link);
   const chosenFormat = vidInfo.formats.find((format) => format.itag === parseInt(itag));
-  const filename = `${vidInfo.videoDetails.title}.${chosenFormat.container}`;
-  const filePath = path.join(filesPath, filename);
-
   if (vidInfo && chosenFormat) {
     res.setHeader("Content-Length", chosenFormat.contentLength);
     ytdl
